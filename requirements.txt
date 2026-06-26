@@ -1,12 +1,15 @@
+altair
 ipython
 jupyterlab
 matplotlib
 mkdocs
 notebook
 numpy
+openpyxl
 pandas
 pip
 python-dotenv
 ruff
 scikit-learn
+streamlit
 -e .

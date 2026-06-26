@@ -21,7 +21,7 @@ def train_random_forest():
     print("Memuat dataset...")
 
     df = load_data(
-        "data/Data_Harga_Interpolasi.xlsx"
+        "data/processed/Data_Harga_Interpolasi_v2.xlsx"
     )
 
     df = create_features(df)
