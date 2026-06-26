@@ -17,7 +17,7 @@ def load_prediction_assets():
 
 
 def load_price_data():
-    df = pd.read_excel("data/Data_Harga_Interpolasi.xlsx")
+    df = pd.read_excel("data/processed/Data_Harga_Interpolasi_v2.xlsx")
     df["Tanggal"] = pd.to_datetime(df["Tanggal"])
     df = df.sort_values("Tanggal").reset_index(drop=True)
 
