@@ -1,6 +1,7 @@
 import streamlit as st
 
 import importlib
+from pathlib import Path
 import pandas as pd
 import predict
 
@@ -21,6 +22,24 @@ def format_percent(value):
     return f"{value:.2f}%"
 
 
+if "forecast_days" not in st.session_state: 
+    st.session_state.forecast_days = 7
+if "forecast_days_slider" not in st.session_state:
+    st.session_state.forecast_days_slider = st.session_state.forecast_days
+if "forecast_days_manual" not in st.session_state:
+    st.session_state.forecast_days_manual = st.session_state.forecast_days
+
+
+def sync_forecast_days_from_slider():
+    st.session_state.forecast_days = st.session_state.forecast_days_slider
+    st.session_state.forecast_days_manual = st.session_state.forecast_days_slider
+
+
+def sync_forecast_days_from_manual():
+    st.session_state.forecast_days = st.session_state.forecast_days_manual
+    st.session_state.forecast_days_slider = st.session_state.forecast_days_manual
+
+
 df = predict.load_price_data()
 harga_terakhir = df["Harga"].iloc[-1]
 tanggal_terakhir_data = df["Tanggal"].iloc[-1].normalize()
@@ -29,7 +48,7 @@ today = pd.Timestamp.today().normalize()
 today_label = today.strftime("%d-%m-%Y")
 
 st.title("Prediksi Harga Cabai Rawit Merah")
-st.caption("Prediksi harga untuk beberapa periode ke depan")
+st.caption("Prediksi harga untuk 30 hari ke depan")
 
 st.write(
     """
@@ -41,26 +60,28 @@ st.write(
 filter_col1, filter_col2 = st.columns([2, 1])
 
 with filter_col1:
-    forecast_days = st.slider(
+    st.slider(
         "Jumlah hari ke depan",
         min_value=1,
         max_value=30,
-        value=7,
         step=1,
+        key="forecast_days_slider",
+        on_change=sync_forecast_days_from_slider,
         help="Geser untuk menentukan berapa hari ke depan yang ingin diprediksi.",
     )
 
 with filter_col2:
-    forecast_days = st.number_input(
+    st.number_input(
         "Input manual",
         min_value=1,
         max_value=30,
-        value=forecast_days,
         step=1,
+        key="forecast_days_manual",
+        on_change=sync_forecast_days_from_manual,
         help="Masukkan jumlah hari secara manual.",
     )
 
-forecast_days = int(forecast_days)
+forecast_days = int(st.session_state.forecast_days)
 days_from_last_data_to_today = max((today - tanggal_terakhir_data).days, 0)
 prediction_days_needed = days_from_last_data_to_today + forecast_days
 raw_forecast_df = predict.predict_future_days(prediction_days_needed)
@@ -98,13 +119,33 @@ st.subheader("Hasil Utama Prediksi")
 highlight_col1, highlight_col2 = st.columns([2, 1])
 
 with highlight_col1:
-    st.info(
+    st.markdown(
         f"""
-        **Prediksi untuk {forecast_days} hari ke depan**
-
-        Pada tanggal **{selected_prediction_date}**, harga Cabai Rawit Merah
-        diprediksi menjadi **{format_rupiah(last_prediction)}**.
-        """
+        <div style="
+            background-color: #e8f4ff;
+            border: 1px solid #b7ddff;
+            border-radius: 8px;
+            padding: 16px 18px;
+        ">
+            <p style="margin: 0 0 10px 0; font-weight: 700;">
+                Prediksi untuk {forecast_days} hari ke depan
+            </p>
+            <p style="margin: 0 0 6px 0;">
+                Pada tanggal <strong>{selected_prediction_date}</strong>,
+                harga Cabai Rawit Merah diprediksi menjadi
+            </p>
+            <p style="
+                margin: 0;
+                font-size: 34px;
+                line-height: 1.15;
+                font-weight: 800;
+                color: #0f172a;
+            ">
+                {format_rupiah(last_prediction)}
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
 with highlight_col2:
@@ -207,10 +248,23 @@ st.subheader("Informasi Model")
 model_col1, model_col2, model_col3 = st.columns(3)
 
 with model_col1:
-    st.metric("Model", "Random Forest")
+    st.metric("Model Aktif", "Random Forest")
 
 with model_col2:
     st.metric("MAPE", "2.58%")
 
 with model_col3:
     st.metric("Jumlah Data", len(df))
+
+available_models = []
+if Path("models/model_random_forest.pkl").exists():
+    available_models.append("Random Forest")
+if Path("models/model_xgboost.pkl").exists():
+    available_models.append("XGBoost")
+
+if available_models:
+    st.caption(
+        "Model tersimpan: "
+        f"{', '.join(available_models)}. "
+        "Prediksi pada halaman ini menggunakan model aktif Random Forest."
+    )
