@@ -36,8 +36,7 @@ days_from_last_data_to_today = max((today - tanggal_terakhir_data).days, 0)
 dashboard_forecast_days = 30
 raw_forecast_df = predict.predict_future_days(days_from_last_data_to_today + dashboard_forecast_days)
 
-st.title("Dashboard ChiliTrack ML")
-st.caption("Ringkasan harga dan prediksi Cabai Rawit Merah Jawa Barat")
+st.title("Harga dan Prediksi Cabai Rawit Merah Jawa Barat")
 
 st.header("Selamat Datang")
 st.write(
