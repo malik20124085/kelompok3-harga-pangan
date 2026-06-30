@@ -13,7 +13,7 @@ if str(PACKAGE_DIR) not in sys.path:
 
 
 st.set_page_config(
-    page_title="ChiliTrack ML",
+    page_title="ChiliForecast",
     page_icon=":hot_pepper:",
     layout="wide",
 )
