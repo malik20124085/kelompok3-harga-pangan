@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 from pathlib import Path
 
 import pandas as pd
@@ -118,6 +116,7 @@ if not DATA_PATH.exists():
 df = add_time_features(load_data(DATA_PATH))
 
 st.title("Exploratory Data Analysis")
+st.caption("Analisis data harga Cabai Rawit Merah berdasarkan dataset yang tersedia.")
 
 if COMMODITY_COLUMN in df.columns:
     commodities = sorted(df[COMMODITY_COLUMN].dropna().unique())
@@ -192,6 +191,7 @@ statistics_df = pd.DataFrame(
             "Maximum",
             "Standar Deviasi",
             "Varians",
+            "Skewness",
             "Kurtosis",
         ],
         "Nilai": [
@@ -201,6 +201,7 @@ statistics_df = pd.DataFrame(
             df[PRICE_COLUMN].max(),
             df[PRICE_COLUMN].std(),
             df[PRICE_COLUMN].var(),
+            df[PRICE_COLUMN].skew(),
             df[PRICE_COLUMN].kurt(),
         ],
     }
@@ -277,6 +278,7 @@ with change_col:
         st.altair_chart(chart, use_container_width=True)
     else:
         st.line_chart(change_df.set_index(DATE_COLUMN))
+    st.metric("Rata-rata Perubahan Harian", f"{df['Persentase_Perubahan'].mean():.2f}%")
 
 st.divider()
 
@@ -296,13 +298,8 @@ monthly_df = (
     .mean()
     .sort_values("Bulan_Angka")
 )
-monthly_year_df = (
-    df.groupby(["Tahun", "Bulan_Angka", "Bulan"], as_index=False)[PRICE_COLUMN]
-    .mean()
-    .sort_values(["Tahun", "Bulan_Angka"])
-)
-highest_month = monthly_year_df.loc[monthly_year_df[PRICE_COLUMN].idxmax()]
-lowest_month = monthly_year_df.loc[monthly_year_df[PRICE_COLUMN].idxmin()]
+highest_month = monthly_df.loc[monthly_df[PRICE_COLUMN].idxmax()]
+lowest_month = monthly_df.loc[monthly_df[PRICE_COLUMN].idxmin()]
 
 skew = df[PRICE_COLUMN].skew()
 if skew > 0:
@@ -339,10 +336,10 @@ with distribution_tab:
             st.bar_chart(df[PRICE_COLUMN].value_counts(bins=35).sort_index())
 
     with target_info_col:
+        st.metric("Skewness", f"{skew:.2f}")
+        st.metric("Batas Bawah Outlier", rupiah(lower_bound))
+        st.metric("Batas Atas Outlier", rupiah(upper_bound))
         st.metric("Jumlah Outlier", len(outlier_df))
-        if len(outlier_df) > 0:
-            st.metric("Batas Bawah Outlier", rupiah(lower_bound))
-            st.metric("Batas Atas Outlier", rupiah(upper_bound))
         st.caption(f"Distribusi harga cenderung {skew_text}.")
 
     month_col, extreme_col = st.columns(2)
@@ -351,38 +348,24 @@ with distribution_tab:
         st.write("Rata-rata harga per bulan")
         show_bar_chart(monthly_df, "Bulan", PRICE_COLUMN)
         st.caption(
-            f"Rata-rata bulanan tertinggi: {highest_month['Bulan']} "
-            f"{highest_month['Tahun']} "
-            f"({rupiah(highest_month[PRICE_COLUMN])}). "
-            f"Rata-rata bulanan terendah: {lowest_month['Bulan']} "
-            f"{lowest_month['Tahun']} "
-            f"({rupiah(lowest_month[PRICE_COLUMN])})."
+            f"Tertinggi: {highest_month['Bulan']} ({rupiah(highest_month[PRICE_COLUMN])}). "
+            f"Terendah: {lowest_month['Bulan']} ({rupiah(lowest_month[PRICE_COLUMN])})."
         )
 
     with extreme_col:
         st.write("Harga tertinggi dan terendah")
-        extreme_price_df = pd.concat(
-            [
-                df.nlargest(5, PRICE_COLUMN)[[DATE_COLUMN, PRICE_COLUMN]].assign(
-                    Kategori="Tertinggi"
-                ),
-                df.nsmallest(5, PRICE_COLUMN)[[DATE_COLUMN, PRICE_COLUMN]].assign(
-                    Kategori="Terendah"
-                ),
-            ],
-            ignore_index=True,
-        )
-        extreme_price_df[DATE_COLUMN] = extreme_price_df[DATE_COLUMN].dt.strftime(
-            "%d-%m-%Y"
-        )
-        extreme_price_df[PRICE_COLUMN] = (
-            extreme_price_df[PRICE_COLUMN]
-            .round(0)
-            .astype(int)
-            .map(lambda value: f"{value:,}".replace(",", "."))
-        )
         st.dataframe(
-            extreme_price_df,
+            pd.concat(
+                [
+                    df.nlargest(5, PRICE_COLUMN)[[DATE_COLUMN, PRICE_COLUMN]].assign(
+                        Kategori="Tertinggi"
+                    ),
+                    df.nsmallest(5, PRICE_COLUMN)[[DATE_COLUMN, PRICE_COLUMN]].assign(
+                        Kategori="Terendah"
+                    ),
+                ],
+                ignore_index=True,
+            ),
             use_container_width=True,
             height=280,
         )
@@ -483,4 +466,3 @@ with correlation_tab:
         "Nilai mendekati 1 berarti hubungan searah kuat, nilai mendekati -1 "
         "berarti hubungan berlawanan kuat, dan nilai mendekati 0 berarti lemah."
     )
->>>>>>> Stashed changes

@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 import joblib
 import numpy as np
 import pandas as pd
@@ -50,6 +48,7 @@ FEATURE_DESCRIPTIONS = {
 
 st.set_page_config(
     page_title="Tentang Model",
+    page_icon=":robot_face:",
     layout="wide",
 )
 
@@ -142,7 +141,7 @@ test_size = len(y_test)
 train_size = int(round(test_size / 0.2 * 0.8))
 total_samples = train_size + test_size
 
-st.title("Tentang Model")
+st.title("🤖 Tentang Model")
 st.write(
     """
     Halaman ini menampilkan konfigurasi dan performa **Random Forest Regressor**
@@ -159,45 +158,51 @@ if load_errors:
             "dimuat penuh."
         )
 
-st.subheader("Konfigurasi Training")
+st.subheader("⚙️ Konfigurasi Training")
 
-config_row = st.columns(5)
-with config_row[0]:
+config_row_1 = st.columns(3)
+with config_row_1[0]:
     metric_card("Algoritma", "Random Forest Regressor")
-with config_row[1]:
-    metric_card("Jumlah Pohon", f"{params.get('n_estimators', 200)} pohon")
-with config_row[2]:
-    metric_card("Kedalaman Maksimum", str(params.get("max_depth", 10)))
-with config_row[3]:
-    metric_card("Data Training", f"{train_size:,} sampel (80%)")
-with config_row[4]:
-    metric_card("Data Testing", f"{test_size:,} sampel (20%)")
+with config_row_1[1]:
+    metric_card("max_depth", str(params.get("max_depth", 10)))
+with config_row_1[2]:
+    metric_card("Training size", f"{train_size:,} sampel (80%)")
+
+config_row_2 = st.columns(3)
+with config_row_2[0]:
+    metric_card("n_estimators", f"{params.get('n_estimators', 200)} pohon")
+with config_row_2[1]:
+    metric_card("random_state", str(params.get("random_state", 42)))
+with config_row_2[2]:
+    metric_card("Test size", f"{test_size:,} sampel (20%)")
 
 st.divider()
 
-st.subheader("Performa Model")
+st.subheader("📈 Performa Model")
 
 perf_col1, perf_col2, perf_col3 = st.columns(3)
 
 with perf_col1:
     st.metric("MAE (Test)", rupiah(mae_rupiah) if scaler_y else f"{mae_rupiah:.4f}")
+    st.caption(f"Skala normalisasi: {metrics['mae']:.4f}")
 
 with perf_col2:
     st.metric("RMSE (Test)", rupiah(rmse_rupiah) if scaler_y else f"{rmse_rupiah:.4f}")
+    st.caption(f"Skala normalisasi: {metrics['rmse']:.4f}")
 
 with perf_col3:
-    st.metric("R2 Score (Test)", f"{r2_score:.4f}")
+    st.metric("R² Score (Test)", f"{r2_score:.4f}")
     st.caption(f"MAPE: {mape:.2f}%")
 
 interpretation_col1, interpretation_col2 = st.columns(2)
 
 with interpretation_col1:
     if r2_score >= 0.8:
-        st.success(f"R2 = {r2_score:.3f} - Model menjelaskan pola harga dengan sangat baik.")
+        st.success(f"R² = {r2_score:.3f} — Model menjelaskan pola harga dengan sangat baik.")
     elif r2_score >= 0.6:
-        st.warning(f"R2 = {r2_score:.3f} - Model cukup baik, tetapi masih dapat ditingkatkan.")
+        st.warning(f"R² = {r2_score:.3f} — Model cukup baik, tetapi masih dapat ditingkatkan.")
     else:
-        st.error(f"R2 = {r2_score:.3f} - Model belum menangkap pola data dengan baik.")
+        st.error(f"R² = {r2_score:.3f} — Model belum menangkap pola data dengan baik.")
 
 with interpretation_col2:
     st.info(
@@ -208,7 +213,7 @@ with interpretation_col2:
 
 st.divider()
 
-st.subheader("Aktual vs Prediksi (Test Set)")
+st.subheader("🎯 Aktual vs Prediksi (Test Set)")
 
 prediction_df = pd.DataFrame(
     {
@@ -253,7 +258,7 @@ if alt:
         .properties(
             height=560,
             title=(
-                f"Aktual vs Prediksi - R2 = {r2_score:.4f} | "
+                f"Aktual vs Prediksi — R² = {r2_score:.4f} | "
                 f"RMSE = {rupiah(rmse_rupiah) if scaler_y else f'{rmse_rupiah:.4f}'}"
             ),
         )
@@ -270,12 +275,10 @@ st.caption(
 
 st.divider()
 
-st.subheader("Feature Importance")
+st.subheader("📊 Feature Importance")
 st.write(
-    "Feature importance menunjukkan seberapa besar setiap fitur membantu model "
-    "Random Forest dalam membentuk prediksi harga. Nilai yang lebih tinggi berarti "
-    "fitur tersebut lebih sering dipakai model untuk membedakan pola harga pada "
-    "data training."
+    "Feature importance menunjukkan kontribusi relatif setiap fitur dalam pengambilan "
+    "keputusan model Random Forest."
 )
 
 if model:
@@ -327,20 +330,7 @@ else:
 
 st.divider()
 
-st.subheader("Informasi Dataset")
-
-dataset_col1, dataset_col2, dataset_col3 = st.columns(3)
-with dataset_col1:
-    st.metric("Total Data Evaluasi", f"{total_samples:,} sampel")
-with dataset_col2:
-    st.metric("Jumlah Fitur Model", len(FEATURES))
-with dataset_col3:
-    st.metric("Target Prediksi", "Harga")
-
-st.write(
-    "Model menggunakan fitur kalender, harga sebelumnya, moving average, dan "
-    "volatilitas harga untuk memprediksi harga Cabai Rawit Merah."
-)
+st.subheader("📋 Deskripsi Fitur Dataset")
 
 feature_description_df = importance_df.copy()
 feature_description_df["Deskripsi Lengkap"] = feature_description_df["Fitur"].map(
@@ -353,10 +343,12 @@ feature_description_df = feature_description_df[
     ["Fitur", "Deskripsi Lengkap", "Satuan", "Importance"]
 ]
 
-st.write("Daftar fitur")
 st.dataframe(
     feature_description_df.style.format({"Importance": "{:.3f}"}),
     hide_index=True,
     use_container_width=True,
 )
->>>>>>> Stashed changes
+
+st.caption(
+    f"Total data evaluasi: {total_samples:,} sampel setelah pembuatan fitur lag dan rolling."
+)
