@@ -6,6 +6,17 @@
 
 A short description of the project.
 
+## Team Member
+
+|  No | NIM      | Name                 | Role                |
+| --: | :------- | :------------------- | :------------------ |
+|   1 | 20124081 | Aldi Riyan Agustin   | Software Engineer 2 |
+|   2 | 20124085 | Malik Nur Khaerudin  | PM & UI/UX Designer |
+|   3 | 20124116 | Damia Hasna Difa     | Data Analyst 1      |
+|   4 | 20124091 | Vina Aulia Melianti  | Data Analyst 2      |
+|   5 | 20124093 | Najwa Annisa Putri   | Software Engineer 1 |
+|   6 | 20124077 | Sahmi Padilaturohmah | Data Analyst 3      |
+
 ## Project Organization
 
 ```
@@ -26,7 +37,7 @@ A short description of the project.
 │                         the creator's initials, and a short `-` delimited description, e.g.
 │                         `1.0-jqp-initial-data-exploration`.
 │
-├── pyproject.toml     <- Project configuration file with package metadata for 
+├── pyproject.toml     <- Project configuration file with package metadata for
 │                         kelompok3_harga_pangan and configuration for tools like black
 │
 ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
@@ -49,13 +60,12 @@ A short description of the project.
     │
     ├── features.py             <- Code to create features for modeling
     │
-    ├── modeling                
-    │   ├── __init__.py 
-    │   ├── predict.py          <- Code to run model inference with trained models          
+    ├── modeling
+    │   ├── __init__.py
+    │   ├── predict.py          <- Code to run model inference with trained models
     │   └── train.py            <- Code to train models
     │
     └── plots.py                <- Code to create visualizations
 ```
 
---------
-
+---
